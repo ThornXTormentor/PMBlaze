@@ -1,0 +1,92 @@
+@page "/teamgen"
+@inject HttpClient Http
+@using PMBlaze.Shared
+@using PokeApiNet
+@using System
+@using System.Security.Cryptography;
+@using System.Globalization;
+
+<PageTitle>Team Gen</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Team Generator</MudText>
+<MudText Class="mb-8">Pick a team of random pokemon</MudText>
+
+<MudButton Color="Color.Secondary" Variant="Variant.Outlined" Size="Size.Large" @onclick="FindPokemon">Find</MudButton>
+
+@if(pokemonNames[5] != "" && pokemonSprites[5] != "")
+{
+    <MudGrid Spacing="2" Justify="Justify.Center">
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[0]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[0]</MudText>
+            </MudPaper>            
+        </MudItem>
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[1]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[1]</MudText>
+            </MudPaper>            
+        </MudItem>
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[2]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[2]</MudText>
+            </MudPaper>            
+        </MudItem>
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[3]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[3]</MudText>
+            </MudPaper>            
+        </MudItem>
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[4]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[4]</MudText>
+            </MudPaper>            
+        </MudItem>
+        <MudItem xs="4">
+            <MudPaper>
+                <MudImage ObjectPosition="ObjectPosition.Center" Src="@pokemonSprites[5]"></MudImage>
+                <MudText Typo="Typo.h5" Align="Align.Center" GutterBottom="true">@pokemonNames[5]</MudText>
+            </MudPaper>            
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    PokeApiClient pokeClient = new PokeApiClient();
+    string[] pokemonSprites = new String[6];
+    string[] pokemonNames = new String[6];
+
+    int pokemonID = 1;
+
+    protected async Task FindPokemon(){
+        for(int i = 0; i <= pokemonSprites.Length - 1; i++)
+        {
+            pokemonID = RandomNumberGenerator.GetInt32(1, 1009);
+            Pokemon randomPokemon = await pokeClient.GetResourceAsync<Pokemon>(pokemonID);
+            pokemonSprites[i] = randomPokemon.Sprites.FrontDefault;
+            pokemonNames[i] = NameFormatting(randomPokemon.Name);
+            Console.WriteLine(pokemonNames[i]);
+            Console.WriteLine(pokemonSprites[i]);
+        }
+    }
+
+    private string NameFormatting(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return string.Empty;
+        }
+
+        string replaceWithSpace = name.Replace('-', ' ');
+
+        return string.Create(replaceWithSpace.Length, replaceWithSpace, static (Span<char> chars, string str) =>
+        {
+            chars[0] = char.ToUpperInvariant(str[0]);
+            str.AsSpan(1).CopyTo(chars[1..]);
+        });
+    }
+}
